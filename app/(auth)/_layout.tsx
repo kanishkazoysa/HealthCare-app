@@ -11,7 +11,6 @@ const AuthLayout = () => {
       >
         <Stack.Screen name="auth/(login)" />
         <Stack.Screen name="auth/(register)" />
-        {/* <Stack.Screen name="auth/(forgot-password)" options={{ headerShown: false }} /> */}
       </Stack>
     </>
   );
