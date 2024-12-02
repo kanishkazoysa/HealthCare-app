@@ -2,24 +2,41 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, Image, Animated, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import images from '@/constants/images'; // Assuming you have an images constant
+import { useNavigation } from '@react-navigation/native';
 
 const Login = () => {
+  const navigation = useNavigation();
   const [bounceAnim] = useState(new Animated.Value(0)); // Initial value for BounceIn animation
+  const [buttonAnim] = useState(new Animated.Value(100)); // Start below screen
+  const [buttonOpacity] = useState(new Animated.Value(0)); // Start with 0 opacity (invisible)
 
   useEffect(() => {
-    // Apply BounceIn animation
-    Animated.sequence([
+    // Apply BounceIn animation for logo and buttons together
+    Animated.parallel([
+      // Logo BounceIn animation
       Animated.timing(bounceAnim, {
         toValue: 2, // Full bounce effect
         duration: 1000, // Duration for animation
         useNativeDriver: true,
       }),
+      // Buttons coming from the bottom with opacity
+      Animated.parallel([
+        Animated.timing(buttonAnim, {
+          toValue: 0, // Move buttons to their final position (from 100 to 0)
+          duration: 1000, // Duration for button animation
+          useNativeDriver: true,
+        }),
+        Animated.timing(buttonOpacity, {
+          toValue: 1, // Make buttons fully visible
+          duration: 1000, // Button fade-in duration
+          useNativeDriver: true,
+        }),
+      ]),
     ]).start();
-  }, []);
+  }, []); // The empty dependency array ensures this runs only once when the component mounts
 
   const handleLogin = () => {
-    // Handle login logic here
-    console.log('Login button pressed');
+    navigation.navigate('login'); // Navigate to Login screen
   };
 
   const handleRegister = () => {
@@ -29,17 +46,22 @@ const Login = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Animated logo with bounce effect */}
       <Animated.View style={[styles.imageContainer, { transform: [{ scale: bounceAnim }] }]}>
         <Image source={images.logo} style={styles.image} />
       </Animated.View>
-      <View style={styles.buttonContainer}>
+
+      {/* Animated buttons container with translation and opacity */}
+      <Animated.View
+        style={[styles.buttonContainer, { transform: [{ translateY: buttonAnim }], opacity: buttonOpacity }]}
+      >
         <TouchableOpacity style={[styles.button, styles.loginButton]} onPress={handleLogin}>
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.button, styles.registerButton]} onPress={handleRegister}>
           <Text style={styles.buttonText}>Register</Text>
         </TouchableOpacity>
-      </View>
+      </Animated.View>
     </SafeAreaView>
   );
 };
