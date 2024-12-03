@@ -1,24 +1,30 @@
 import React, { useState } from "react";
-import { 
-  StyleSheet, 
-  Text, 
-  View, 
-  TextInput, 
-  TouchableOpacity, 
-  Alert, 
-  Image, 
-  ScrollView, 
-  Dimensions, 
-  KeyboardAvoidingView, 
-  Platform 
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  Image,
+  ScrollView,
+  Dimensions,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { StatusBar } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons"; // For icons
-import { Link } from "expo-router"; // For navigation links
+import { MaterialIcons } from "@expo/vector-icons";
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 
-import images from '@/constants/images'; 
+import images from "@/constants/images";
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+type RootStackParamList = {
+  login: undefined;
+  register: undefined;
+};
+type AuthScreenNavigationProp = StackNavigationProp<RootStackParamList, 'register'>;
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const Login = () => {
   const [form, setForm] = useState({
@@ -27,54 +33,43 @@ const Login = () => {
   });
   const [passwordVisible, setPasswordVisible] = useState(false);
 
+  const navigation = useNavigation<AuthScreenNavigationProp>();
+
   const handleLogin = () => {
     if (form.email === "" || form.password === "") {
       Alert.alert("Error", "Please fill in both fields.");
     } else {
-      // Handle login logic here
       console.log("Email:", form.email);
       console.log("Password:", form.password);
       Alert.alert("Logged In", "Welcome to the app!");
     }
   };
 
+  const handleSignUpPress = () => {
+   navigation.navigate("register");
+  };
+
   return (
-    <KeyboardAvoidingView 
-      style={styles.container} 
-      behavior={Platform.OS === "ios" ? "padding" : "height"} 
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
     >
-      {/* Status Bar */}
-      <StatusBar 
-        translucent 
-        backgroundColor="transparent" 
-        barStyle="light-content" 
-      />
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
 
-      {/* Full Screen Cover Image */}
       <View style={styles.coverImageContainer}>
-        <Image 
-          source={images.cover} 
-          style={styles.coverImage} 
-          resizeMode="cover"
-        />
+        <Image source={images.cover} style={styles.coverImage} resizeMode="cover" />
         <Text style={styles.welcomeText}>LOGIN</Text>
       </View>
 
-      {/* Scrollable Content */}
-      <ScrollView 
-        style={styles.scrollContainer}
-        contentContainerStyle={styles.scrollContentContainer}
-      >
-        {/* Form container */}
+      <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.scrollContentContainer}>
         <View style={styles.formContainer}>
-          {/* Email Input */}
           <View style={styles.inputContainer}>
             <MaterialIcons name="email" size={24} color="#ccc" style={styles.inputIcon} />
             <TextInput
               style={styles.inputField}
               placeholder="Enter your email"
-              placeholderTextColor="#aaa"  // Darker placeholder color
+              placeholderTextColor="#aaa"
               value={form.email}
               onChangeText={(value) => setForm({ ...form, email: value })}
               keyboardType="email-address"
@@ -82,39 +77,32 @@ const Login = () => {
             />
           </View>
 
-          {/* Password Input */}
           <View style={styles.inputContainer}>
             <MaterialIcons name="lock" size={24} color="#ccc" style={styles.inputIcon} />
             <TextInput
               style={styles.inputField}
               placeholder="Enter your password"
-              placeholderTextColor="#aaa"  // Darker placeholder color
+              placeholderTextColor="#aaa"
               value={form.password}
               onChangeText={(value) => setForm({ ...form, password: value })}
-              secureTextEntry={!passwordVisible}  // Toggle password visibility
+              secureTextEntry={!passwordVisible}
               autoCapitalize="none"
             />
             <TouchableOpacity onPress={() => setPasswordVisible(!passwordVisible)} style={styles.eyeIcon}>
-              <MaterialIcons 
-                name={passwordVisible ? "visibility" : "visibility-off"} 
-                size={24} 
-                color="#707171" 
-              />
+              <MaterialIcons name={passwordVisible ? "visibility" : "visibility-off"} size={24} color="#707171" />
             </TouchableOpacity>
           </View>
 
-          {/* Login Button */}
           <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
             <Text style={styles.buttonText}>Sign In</Text>
           </TouchableOpacity>
 
-          {/* Forgot Password and Already Have an Account */}
           <View style={styles.footerContainer}>
-            <Text style={styles.alreadyAccountText}>
-              Don't have an account? {" "} 
-              <Link href="../sign-up" style={styles.linkText}>
-                SignUp
-              </Link>
+            <Text style={styles.footerText}>
+              Don't have an account?{" "}
+              <Text onPress={handleSignUpPress} style={styles.linkText}>
+                Sign Up
+              </Text>
             </Text>
           </View>
         </View>
@@ -130,13 +118,13 @@ const styles = StyleSheet.create({
   },
   coverImageContainer: {
     width: SCREEN_WIDTH,
-    height: SCREEN_HEIGHT * 0.45, // Adjust the height as needed
+    height: SCREEN_HEIGHT * 0.45,
     position: "relative",
   },
   coverImage: {
-    width: '100%',
-    height: '100%',
-    position: 'absolute',
+    width: "100%",
+    height: "100%",
+    position: "absolute",
     top: 0,
     left: 0,
   },
@@ -197,18 +185,18 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   footerContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
     alignItems: "center",
-    marginTop: 80,
+    marginTop: 20,
+  },
+  footerText: {
+    fontSize: 16,
+    color: "#666",
   },
   linkText: {
     color: "#2196F3",
-    fontSize: 16,
     fontWeight: "bold",
-  },
-  alreadyAccountText: {
-    marginTop: 10,
-    fontSize: 16,
-    textAlign: "center",
   },
 });
 
