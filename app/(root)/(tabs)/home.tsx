@@ -6,7 +6,8 @@ import {
   Image, 
   TextInput, 
   ScrollView, 
-  TouchableOpacity 
+  TouchableOpacity, 
+  ActivityIndicator
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
@@ -79,6 +80,7 @@ interface Hospital {
 const Home = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [hospitalData, setHospitalData] = useState<Hospital[]>([]);
+  const [loading, setLoading] = useState(true); // Loading state to show the loader
 
   const viewedHospitals = useHospitalStore((state) => state.viewedHospitals);
   const addViewedHospital = useHospitalStore((state) => state.addViewedHospital);
@@ -107,11 +109,13 @@ const Home = () => {
           address: item.street_address, 
           zip_code: item.zip_code, 
         }));
-        
+
         setHospitalData(hospitals);
+        setLoading(false); // Set loading to false after data is fetched
 
       } catch (error) {
         console.error('Error fetching hospital data:', error);
+        setLoading(false); // Set loading to false in case of an error
       }
     };
 
@@ -200,14 +204,21 @@ const Home = () => {
         </View>
       </View>
 
-      <ScrollView 
-        contentContainerStyle={styles.scrollViewContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {filteredHospitals.map(hospital => (
-          <HospitalCard key={hospital.id} hospital={hospital} />
-        ))}
-      </ScrollView>
+      {/* Show loader while data is being fetched */}
+      {loading ? (
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator size="large" color="#0BA787" />
+        </View>
+      ) : (
+        <ScrollView 
+          contentContainerStyle={styles.scrollViewContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {filteredHospitals.map(hospital => (
+            <HospitalCard key={hospital.id} hospital={hospital} />
+          ))}
+        </ScrollView>
+      )}
     </SafeAreaView>
   );
 };
@@ -257,6 +268,12 @@ const styles = StyleSheet.create({
   },
   scrollViewContent: {
     paddingBottom: 20
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100%'
   },
   card: {
     flexDirection: 'row',
