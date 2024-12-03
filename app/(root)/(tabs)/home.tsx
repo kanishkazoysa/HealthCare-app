@@ -85,6 +85,7 @@ const Home = () => {
   const viewedCount = useHospitalStore((state) => state.getViewedCount());
 
   useEffect(() => {
+    // Fetch hospital data only once
     const fetchHospitalData = async () => {
       try {
         const response = await fetch('http://www.communitybenefitinsight.org/api/get_hospitals.php?state=NC', {
@@ -114,7 +115,7 @@ const Home = () => {
       }
     };
 
-    fetchHospitalData();
+    fetchHospitalData(); // This fetch happens only once when component mounts
   }, []);
 
   const filteredHospitals = hospitalData.filter(hospital => {
