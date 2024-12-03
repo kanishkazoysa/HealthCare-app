@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { StatusBar } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons"; // For icons
+import { Link } from "expo-router"; // For navigation links
 
 import images from '@/constants/images'; 
 
@@ -73,7 +74,7 @@ const Login = () => {
             <TextInput
               style={styles.inputField}
               placeholder="Enter your email"
-              placeholderTextColor="#aaa"  // Make the placeholder color darker
+              placeholderTextColor="#aaa"  // Darker placeholder color
               value={form.email}
               onChangeText={(value) => setForm({ ...form, email: value })}
               keyboardType="email-address"
@@ -97,7 +98,7 @@ const Login = () => {
               <MaterialIcons 
                 name={passwordVisible ? "visibility" : "visibility-off"} 
                 size={24} 
-                color="#ccc" 
+                color="#707171" 
               />
             </TouchableOpacity>
           </View>
@@ -106,6 +107,16 @@ const Login = () => {
           <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
             <Text style={styles.buttonText}>Sign In</Text>
           </TouchableOpacity>
+
+          {/* Forgot Password and Already Have an Account */}
+          <View style={styles.footerContainer}>
+            <Text style={styles.alreadyAccountText}>
+              Don't have an account? {" "} 
+              <Link href="../sign-up" style={styles.linkText}>
+                SignUp
+              </Link>
+            </Text>
+          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -133,10 +144,12 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: "87%",
     left: 20,
-    fontSize: 24,
+    fontSize: 29,
     fontWeight: "bold",
-    color: "#fff",
+    color: "#205B9E",
     zIndex: 1,
+    textAlign: "center",
+    width: "90%",
   },
   scrollContainer: {
     flex: 1,
@@ -146,7 +159,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
   },
   formContainer: {
-    marginTop: 20,
+    marginTop: 40,
   },
   inputContainer: {
     flexDirection: "row",
@@ -182,6 +195,20 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  footerContainer: {
+    alignItems: "center",
+    marginTop: 80,
+  },
+  linkText: {
+    color: "#2196F3",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  alreadyAccountText: {
+    marginTop: 10,
+    fontSize: 16,
+    textAlign: "center",
   },
 });
 
