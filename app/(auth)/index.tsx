@@ -1,11 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, Image, Animated, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import images from '@/constants/images'; // Assuming you have an images constant
 import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+
+// Assuming you have images in the correct path
+import images from '@/constants/images'; 
+
+// Define navigation params correctly
+type RootStackParamList = {
+  login: undefined;
+  register: undefined;
+};
+
+type AuthScreenNavigationProp = StackNavigationProp<RootStackParamList, 'login'>;
 
 const Login = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<AuthScreenNavigationProp>();
+  
   const [bounceAnim] = useState(new Animated.Value(0)); // Initial value for BounceIn animation
   const [buttonAnim] = useState(new Animated.Value(100)); // Start below screen
   const [buttonOpacity] = useState(new Animated.Value(0)); // Start with 0 opacity (invisible)
@@ -19,39 +31,34 @@ const Login = () => {
         duration: 1000, // Duration for animation
         useNativeDriver: true,
       }),
-      // Buttons coming from the bottom with opacity
       Animated.parallel([
         Animated.timing(buttonAnim, {
-          toValue: 0, // Move buttons to their final position (from 100 to 0)
-          duration: 1000, // Duration for button animation
+          toValue: 0,
+          duration: 1000,
           useNativeDriver: true,
         }),
         Animated.timing(buttonOpacity, {
-          toValue: 1, // Make buttons fully visible
-          duration: 1000, // Button fade-in duration
+          toValue: 1,
+          duration: 1000,
           useNativeDriver: true,
         }),
       ]),
     ]).start();
-  }, []); // The empty dependency array ensures this runs only once when the component mounts
+  }, []); 
 
   const handleLogin = () => {
-    navigation.navigate('login'); // Navigate to Login screen
+    navigation.navigate('login');
   };
 
   const handleRegister = () => {
-    // Handle register logic here
-    console.log('Register button pressed');
+    navigation.navigate('register');
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Animated logo with bounce effect */}
       <Animated.View style={[styles.imageContainer, { transform: [{ scale: bounceAnim }] }]}>
         <Image source={images.logo} style={styles.image} />
       </Animated.View>
-
-      {/* Animated buttons container with translation and opacity */}
       <Animated.View
         style={[styles.buttonContainer, { transform: [{ translateY: buttonAnim }], opacity: buttonOpacity }]}
       >

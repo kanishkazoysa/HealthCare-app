@@ -9,7 +9,7 @@ const AuthLayout = () => {
           headerShown: false,
         }}
       >
-        <Stack.Screen name="auth/(login)" />
+        <Stack.Screen name="auth/(login)"  />
         <Stack.Screen name="auth/(register)" />
       </Stack>
     </>
