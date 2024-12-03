@@ -11,19 +11,13 @@ import {
   Dimensions,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import { StatusBar } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-
 import images from "@/constants/images";
+import { router } from "expo-router";
 
-type RootStackParamList = {
-  login: undefined;
-  register: undefined;
-};
-type AuthScreenNavigationProp = StackNavigationProp<RootStackParamList, 'register'>;
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const Login = () => {
@@ -32,21 +26,25 @@ const Login = () => {
     password: "",
   });
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [isImageLoading, setIsImageLoading] = useState(true); // Track if image is loading
 
-  const navigation = useNavigation<AuthScreenNavigationProp>();
+  
 
   const handleLogin = () => {
     if (form.email === "" || form.password === "") {
       Alert.alert("Error", "Please fill in both fields.");
     } else {
-      console.log("Email:", form.email);
-      console.log("Password:", form.password);
-      Alert.alert("Logged In", "Welcome to the app!");
+      router.replace("/(root)/(tabs)/home");
     }
   };
 
   const handleSignUpPress = () => {
-   navigation.navigate("register");
+    router.replace("/register");
+  };
+
+
+  const handleImageLoad = () => {
+    setIsImageLoading(false);
   };
 
   return (
@@ -57,11 +55,25 @@ const Login = () => {
     >
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
 
+      {/* Full Screen Cover Image */}
       <View style={styles.coverImageContainer}>
-        <Image source={images.cover} style={styles.coverImage} resizeMode="cover" />
-        <Text style={styles.welcomeText}>LOGIN</Text>
+        {isImageLoading && (
+          <ActivityIndicator
+            size="large"
+            color="#205B9E"
+            style={styles.loader} // Style for the loader
+          />
+        )}
+        <Image
+          source={images.cover}
+          style={styles.coverImage}
+          resizeMode="cover"
+          onLoad={handleImageLoad} // Detect image load completion
+        />
+        <Text style={styles.welcomeText}>SIGN IN</Text>
       </View>
 
+      {/* Scrollable Content */}
       <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.scrollContentContainer}>
         <View style={styles.formContainer}>
           <View style={styles.inputContainer}>
@@ -127,6 +139,13 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 0,
     left: 0,
+  },
+  loader: {
+    position: "absolute",
+    top: "45%", // Position the loader in the middle of the screen
+    left: "50%",
+    transform: [{ translateX: -20 }, { translateY: -20 }], // To center the loader
+    zIndex: 2,
   },
   welcomeText: {
     position: "absolute",
