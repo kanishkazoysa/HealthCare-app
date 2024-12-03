@@ -8,12 +8,12 @@ import {
   Alert, 
   Image, 
   ScrollView, 
-  Dimensions,
-  KeyboardAvoidingView,
-  Platform
+  Dimensions, 
+  KeyboardAvoidingView, 
+  Platform 
 } from "react-native";
 import { StatusBar } from "react-native";
-import { Feather } from "@expo/vector-icons"; // Make sure to install @expo/vector-icons
+import { MaterialIcons } from "@expo/vector-icons"; // For icons
 
 import images from '@/constants/images'; 
 
@@ -24,11 +24,7 @@ const Login = () => {
     email: "",
     password: "",
   });
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [isFocused, setIsFocused] = useState({
-    email: false,
-    password: false
-  });
+  const [passwordVisible, setPasswordVisible] = useState(false);
 
   const handleLogin = () => {
     if (form.email === "" || form.password === "") {
@@ -41,60 +37,13 @@ const Login = () => {
     }
   };
 
-  const renderInputField = (
-    placeholder, 
-    value, 
-    onChangeText, 
-    isPassword = false, 
-    keyboardType = "default",
-    iconName
-  ) => {
-    const inputType = isPassword ? "password" : "email";
-    
-    return (
-      <View style={[
-        styles.inputContainer, 
-        isFocused[inputType] && styles.inputContainerFocused
-      ]}>
-        <Feather 
-          name={iconName} 
-          size={20} 
-          color={isFocused[inputType] ? "#0BA787" : "#888"} 
-          style={styles.inputIcon}
-        />
-        <TextInput
-          style={styles.inputField}
-          placeholder={placeholder}
-          placeholderTextColor="#999"
-          value={value}
-          onChangeText={onChangeText}
-          keyboardType={keyboardType}
-          autoCapitalize="none"
-          secureTextEntry={isPassword && !isPasswordVisible}
-          onFocus={() => setIsFocused({...isFocused, [inputType]: true})}
-          onBlur={() => setIsFocused({...isFocused, [inputType]: false})}
-        />
-        {isPassword && (
-          <TouchableOpacity 
-            onPress={() => setIsPasswordVisible(!isPasswordVisible)}
-            style={styles.eyeIconContainer}
-          >
-            <Feather 
-              name={isPasswordVisible ? "eye-off" : "eye"} 
-              size={20} 
-              color="#888"
-            />
-          </TouchableOpacity>
-        )}
-      </View>
-    );
-  };
-
   return (
     <KeyboardAvoidingView 
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}
+      style={styles.container} 
+      behavior={Platform.OS === "ios" ? "padding" : "height"} 
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
     >
+      {/* Status Bar */}
       <StatusBar 
         translucent 
         backgroundColor="transparent" 
@@ -108,49 +57,55 @@ const Login = () => {
           style={styles.coverImage} 
           resizeMode="cover"
         />
-        <Text style={styles.welcomeText}>LOGIN </Text>
+        <Text style={styles.welcomeText}>LOGIN</Text>
       </View>
 
       {/* Scrollable Content */}
       <ScrollView 
         style={styles.scrollContainer}
         contentContainerStyle={styles.scrollContentContainer}
-        keyboardShouldPersistTaps="handled"
       >
         {/* Form container */}
         <View style={styles.formContainer}>
-          {renderInputField(
-            "Enter your email",
-            form.email,
-            (value) => setForm({ ...form, email: value }),
-            false,
-            "email-address",
-            "mail"
-          )}
+          {/* Email Input */}
+          <View style={styles.inputContainer}>
+            <MaterialIcons name="email" size={24} color="#ccc" style={styles.inputIcon} />
+            <TextInput
+              style={styles.inputField}
+              placeholder="Enter your email"
+              placeholderTextColor="#aaa"  // Make the placeholder color darker
+              value={form.email}
+              onChangeText={(value) => setForm({ ...form, email: value })}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+          </View>
 
-          {renderInputField(
-            "Enter your password",
-            form.password,
-            (value) => setForm({ ...form, password: value }),
-            true,
-            "default",
-            "lock"
-          )}
+          {/* Password Input */}
+          <View style={styles.inputContainer}>
+            <MaterialIcons name="lock" size={24} color="#ccc" style={styles.inputIcon} />
+            <TextInput
+              style={styles.inputField}
+              placeholder="Enter your password"
+              placeholderTextColor="#aaa"  // Darker placeholder color
+              value={form.password}
+              onChangeText={(value) => setForm({ ...form, password: value })}
+              secureTextEntry={!passwordVisible}  // Toggle password visibility
+              autoCapitalize="none"
+            />
+            <TouchableOpacity onPress={() => setPasswordVisible(!passwordVisible)} style={styles.eyeIcon}>
+              <MaterialIcons 
+                name={passwordVisible ? "visibility" : "visibility-off"} 
+                size={24} 
+                color="#ccc" 
+              />
+            </TouchableOpacity>
+          </View>
 
-          <TouchableOpacity style={styles.forgotPasswordContainer}>
-            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-          </TouchableOpacity>
-
+          {/* Login Button */}
           <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
             <Text style={styles.buttonText}>Sign In</Text>
           </TouchableOpacity>
-
-          <View style={styles.signupContainer}>
-            <Text style={styles.signupText}>Don't have an account? </Text>
-            <TouchableOpacity>
-              <Text style={styles.signupLinkText}>Sign Up</Text>
-            </TouchableOpacity>
-          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -164,7 +119,7 @@ const styles = StyleSheet.create({
   },
   coverImageContainer: {
     width: SCREEN_WIDTH,
-    height: SCREEN_HEIGHT * 0.45,
+    height: SCREEN_HEIGHT * 0.45, // Adjust the height as needed
     position: "relative",
   },
   coverImage: {
@@ -177,11 +132,10 @@ const styles = StyleSheet.create({
   welcomeText: {
     position: "absolute",
     top: "87%",
-    bottom: 20,
     left: 20,
     fontSize: 24,
     fontWeight: "bold",
-    color: "#205B9E",
+    color: "#fff",
     zIndex: 1,
   },
   scrollContainer: {
@@ -195,41 +149,27 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    height: 50,
-    borderColor: "#ccc",
+    flexDirection: "row",
+    alignItems: "center",
     borderWidth: 1,
+    borderColor: "#ccc",
     borderRadius: 8,
     marginBottom: 20,
     paddingHorizontal: 15,
     backgroundColor: "#fff",
-  },
-  inputContainerFocused: {
-    borderColor: "#0BA787",
-    shadowColor: "#0BA787",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 2,
   },
   inputIcon: {
     marginRight: 10,
   },
   inputField: {
     flex: 1,
+    height: 50,
     fontSize: 16,
+    backgroundColor: "#fff",
   },
-  eyeIconContainer: {
-    padding: 5,
-  },
-  forgotPasswordContainer: {
-    alignSelf: 'flex-end',
-    marginBottom: 20,
-  },
-  forgotPasswordText: {
-    color: "#0BA787",
-    fontWeight: "600",
+  eyeIcon: {
+    position: "absolute",
+    right: 15,
   },
   loginButton: {
     backgroundColor: "#0BA787",
@@ -237,23 +177,10 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 20,
   },
   buttonText: {
     color: "#fff",
     fontSize: 16,
-    fontWeight: "bold",
-  },
-  signupContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  signupText: {
-    color: "#666",
-  },
-  signupLinkText: {
-    color: "#0BA787",
     fontWeight: "bold",
   },
 });
