@@ -8,7 +8,7 @@ import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 
-SplashScreen.preventAutoHideAsync(); // Ensure splash screen is prevented from hiding automatically
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -17,28 +17,27 @@ export default function RootLayout() {
   });
   const [isSplashReady, setIsSplashReady] = useState(false);
 
-  // Hide splash screen after fonts are loaded
   useEffect(() => {
     if (loaded) {
-      // After fonts are loaded, allow splash screen to hide
       setIsSplashReady(true);
       SplashScreen.hideAsync();
     }
   }, [loaded]);
 
   if (!isSplashReady) {
-    return null; // Return null until the splash screen can hide
+    return null;
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        <Stack.Screen name="(root)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <Stack
+      screenOptions={{
+        headerShown: false, // Disable header globally for this Stack
+      }}
+    >
+      <Stack.Screen name="index" />
+      <Stack.Screen name="(auth)" />
+      <Stack.Screen name="(root)" />
+      <Stack.Screen name="+not-found" />
+    </Stack>
   );
 }
