@@ -11,21 +11,12 @@ import {
   Dimensions,
   KeyboardAvoidingView,
   Platform,
-  ActivityIndicator,
 } from "react-native";
 import { StatusBar } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
 import { router } from "expo-router";
-
 import images from "@/constants/images";
 
-type RootStackParamList = {
-  login: undefined;
-  register: undefined;
-};
-type AuthScreenNavigationProp = StackNavigationProp<RootStackParamList, 'login'>;
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -37,9 +28,6 @@ const Register = () => {
     confirmPassword: "",
   });
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const [isImageLoading, setIsImageLoading] = useState(true);
-
-  const navigation = useNavigation<AuthScreenNavigationProp>();
 
   const handleRegister = () => {
     const { username, email, password, confirmPassword } = form;
@@ -55,11 +43,7 @@ const Register = () => {
 
   const handleLoginPress = () => {
     router.replace("/login");
-  };
-
-  const handleImageLoad = () => {
-    setIsImageLoading(false); // Set image loading state to false when image is loaded
-  };
+  }
 
   return (
     <KeyboardAvoidingView
@@ -68,21 +52,11 @@ const Register = () => {
       keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
     >
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
-
-      {/* Full Screen Cover Image */}
       <View style={styles.coverImageContainer}>
-        {isImageLoading && (
-          <ActivityIndicator
-            size="large"
-            color="#205B9E"
-            style={styles.loader} // Style for the loader
-          />
-        )}
         <Image
           source={images.cover}
           style={styles.coverImage}
           resizeMode="cover"
-          onLoad={handleImageLoad} // Detect image load completion
         />
         <Text style={styles.welcomeText}>REGISTER</Text>
       </View>
@@ -90,7 +64,6 @@ const Register = () => {
       {/* Scrollable Content */}
       <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.scrollContentContainer}>
         <View style={styles.formContainer}>
-          {/* Username Input */}
           <View style={styles.inputContainer}>
             <MaterialIcons name="person" size={24} color="#ccc" style={styles.inputIcon} />
             <TextInput
@@ -103,7 +76,7 @@ const Register = () => {
             />
           </View>
 
-          {/* Email Input */}
+       
           <View style={styles.inputContainer}>
             <MaterialIcons name="email" size={24} color="#ccc" style={styles.inputIcon} />
             <TextInput
@@ -117,7 +90,7 @@ const Register = () => {
             />
           </View>
 
-          {/* Password Input */}
+         
           <View style={styles.inputContainer}>
             <MaterialIcons name="lock" size={24} color="#ccc" style={styles.inputIcon} />
             <TextInput
@@ -134,7 +107,7 @@ const Register = () => {
             </TouchableOpacity>
           </View>
 
-          {/* Confirm Password Input */}
+          
           <View style={styles.inputContainer}>
             <MaterialIcons name="lock" size={24} color="#ccc" style={styles.inputIcon} />
             <TextInput
@@ -151,12 +124,11 @@ const Register = () => {
             </TouchableOpacity>
           </View>
 
-          {/* Register Button */}
+         
           <TouchableOpacity style={styles.loginButton} onPress={handleRegister}>
             <Text style={styles.buttonText}>Register</Text>
           </TouchableOpacity>
 
-          {/* Login Link */}
           <View style={styles.footerContainer}>
             <Text style={styles.footerText}>
               Already have an account?{" "}
@@ -188,13 +160,6 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
   },
-  loader: {
-    position: "absolute",
-    top: "45%", // Position the loader in the middle of the screen
-    left: "50%",
-    transform: [{ translateX: -20 }, { translateY: -20 }], // To center the loader
-    zIndex: 2,
-  },
   welcomeText: {
     position: "absolute",
     top: "87%",
@@ -221,6 +186,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 1,
     borderColor: "#ccc",
+    top: -30,
     borderRadius: 8,
     marginBottom: 20,
     paddingHorizontal: 15,

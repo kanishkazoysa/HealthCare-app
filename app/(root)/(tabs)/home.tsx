@@ -51,7 +51,15 @@ const useHospitalStore = create<HospitalStore>()(
     }),
     {
       name: 'hospital-storage',
-      storage: customPersistStorage
+      storage: customPersistStorage,
+      onRehydrateStorage: () => {
+        return (state) => {
+          // Clear viewed hospitals on app launch
+          if (state) {
+            state.viewedHospitals = {};
+          }
+        }
+      }
     }
   )
 );
@@ -101,7 +109,7 @@ interface Hospital {
   icon: any;
 }
 
-const Home = () => {
+const Home = (p0: (state: any) => any) => {
   const [searchQuery, setSearchQuery] = useState('');
   
   // Use Zustand store hooks
@@ -214,7 +222,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15
   },
   searchContainer: {
-    marginTop: -45,
+    marginTop: 15,
     marginVertical: 15,
     paddingHorizontal: 10,
     flexDirection: 'row',
