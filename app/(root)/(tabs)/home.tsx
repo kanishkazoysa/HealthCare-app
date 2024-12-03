@@ -65,6 +65,7 @@ const useHospitalStore = create<HospitalStore>()(
 );
 
 interface Hospital {
+  zip_code: ReactNode;
   city: ReactNode;
   lastUpdated: ReactNode;
   id: string;
@@ -133,14 +134,13 @@ const Home = () => {
 
     return (
       <View style={styles.card}>
-         <View style={styles.iconContainer}>
-        {/* Display hospital icon */}
-        {/* If hospital.icon is empty or undefined, use a default image */}
-        <Image
-          source={require('../../../assets/images/hospital.webp')} // Path to the local image
-          style={styles.hospitalIcon}
-        />
-      </View>
+        <View style={styles.iconContainer}>
+          {/* Display hospital icon */}
+          <Image
+            source={require('../../../assets/images/hospital.webp')} // Path to the local image
+            style={styles.hospitalIcon}
+          />
+        </View>
         <View style={styles.detailsContainer}>
           <Text style={styles.hospitalName}>{hospital.name}</Text>
           <Text style={styles.hospitalDetail}>
@@ -155,14 +155,16 @@ const Home = () => {
             <Text style={styles.detailLabel}>Beds: </Text>
             {hospital.beds}
           </Text>
-          <Text style={styles.hospitalDetail}>
-            <Text style={styles.detailLabel}>Zip Code: </Text>
-            {hospital.lastUpdated}
-          </Text>
-
+          
+          {/* Display Zip Code and View Button on the same line */}
           <View style={styles.bedsAndButtonContainer}>
-            <TouchableOpacity 
-              style={[styles.viewMoreButton, isViewed && styles.viewedButton]} 
+            <Text style={styles.hospitalDetail}>
+              <Text style={styles.detailLabel}>Zip Code: </Text>
+              {hospital.zip_code}
+            </Text>
+
+            <TouchableOpacity
+              style={[styles.viewMoreButton, isViewed && styles.viewedButton]}
               onPress={handleViewMore}
             >
               <Text style={styles.viewMoreText}>
@@ -208,8 +210,6 @@ const Home = () => {
     </SafeAreaView>
   );
 };
-
-
 
 const styles = StyleSheet.create({
   container: {
@@ -287,12 +287,14 @@ const styles = StyleSheet.create({
   },
   bedsAndButtonContainer: {
     flexDirection: 'row',
+    marginTop: -8,
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'space-between',  // Ensure the button is aligned to the right
     alignSelf: 'stretch'
   },
   hospitalName: {
-    fontSize: 18,
+    fontSize: 16,
+    marginBottom: 5,
     fontWeight: 'bold',
     color: '#2c3e50'
   },
@@ -315,8 +317,7 @@ const styles = StyleSheet.create({
   viewMoreText: {
     color: 'white',
     fontWeight: 'bold'
-  },
-  
+  }
 });
 
 export default Home;
