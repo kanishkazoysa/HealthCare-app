@@ -9,7 +9,52 @@ import {
   TouchableOpacity 
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Feather } from '@expo/vector-icons'; // Make sure to install @expo/vector-icons
+import { Feather } from '@expo/vector-icons';
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Create Zustand store for hospital views
+interface HospitalStore {
+  viewedHospitals: Record<string, boolean>;
+  addViewedHospital: (hospitalId: string) => void;
+  getViewedCount: () => number;
+}
+
+const customPersistStorage = {
+  getItem: async (name: string) => {
+    const value = await AsyncStorage.getItem(name);
+    return value ? JSON.parse(value) : null;
+  },
+  setItem: async (name: string, value: any) => {
+    await AsyncStorage.setItem(name, JSON.stringify(value));
+  },
+  removeItem: async (name: string) => {
+    await AsyncStorage.removeItem(name);
+  }
+};
+
+const useHospitalStore = create<HospitalStore>()(
+  persist(
+    (set, get) => ({
+      viewedHospitals: {},
+      addViewedHospital: (hospitalId) => set((state) => ({
+        viewedHospitals: {
+          ...state.viewedHospitals,
+          [hospitalId]: true
+        }
+      })),
+      getViewedCount: () => {
+        const { viewedHospitals } = get();
+        return Object.keys(viewedHospitals).length;
+      }
+    }),
+    {
+      name: 'hospital-storage',
+      storage: customPersistStorage
+    }
+  )
+);
 
 // Dummy hospital data
 const hospitalData = [
@@ -58,6 +103,11 @@ interface Hospital {
 
 const Home = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Use Zustand store hooks
+  const viewedHospitals = useHospitalStore((state) => state.viewedHospitals);
+  const addViewedHospital = useHospitalStore((state) => state.addViewedHospital);
+  const viewedCount = useHospitalStore((state) => state.getViewedCount());
 
   // Filter hospitals based on search query
   const filteredHospitals = hospitalData.filter(hospital => 
@@ -66,9 +116,13 @@ const Home = () => {
   );
 
   const HospitalCard = ({ hospital }: { hospital: Hospital }) => {
+    const isViewed = viewedHospitals[hospital.id];
+
     const handleViewMore = () => {
-      // Implement navigation or modal to show more hospital details
-      console.log(`View more details for ${hospital.name}`);
+      // Only add to viewed hospitals if not already viewed
+      if (!isViewed) {
+        addViewedHospital(hospital.id);
+      }
     };
 
     return (
@@ -101,10 +155,15 @@ const Home = () => {
 
             {/* View More Button */}
             <TouchableOpacity 
-              style={styles.viewMoreButton} 
+              style={[
+                styles.viewMoreButton, 
+                isViewed && styles.viewedButton
+              ]} 
               onPress={handleViewMore}
             >
-              <Text style={styles.viewMoreText}>View</Text>
+              <Text style={styles.viewMoreText}>
+                {isViewed ? 'Viewed' : 'View'}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -114,7 +173,7 @@ const Home = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Search Bar with Icon */}
+      {/* Search and Viewed Count Container */}
       <View style={styles.searchContainer}>
         <View style={styles.searchInputContainer}>
           <Feather 
@@ -129,6 +188,9 @@ const Home = () => {
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
+        </View>
+        <View style={styles.viewedCountContainer}>
+          <Text style={styles.viewedCountText}>Viewed: {viewedCount}</Text>
         </View>
       </View>
 
@@ -154,7 +216,10 @@ const styles = StyleSheet.create({
   searchContainer: {
     marginTop: -45,
     marginVertical: 15,
-    paddingHorizontal: 10
+    paddingHorizontal: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between'
   },
   searchInputContainer: {
     flexDirection: 'row',
@@ -163,7 +228,19 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     borderColor: '#ddd',
-    paddingHorizontal: 10
+    paddingHorizontal: 10,
+    flex: 1,
+    marginRight: 10
+  },
+  viewedCountContainer: {
+    backgroundColor: '#0BA787',
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 12
+  },
+  viewedCountText: {
+    color: 'white',
+    fontWeight: 'bold'
   },
   searchIcon: {
     marginRight: 10
@@ -230,6 +307,9 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 8
+  },
+  viewedButton: {
+    backgroundColor: '#888'
   },
   viewMoreText: {
     color: 'white',
