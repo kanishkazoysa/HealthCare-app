@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    height: 180
+    height: 140
   },
   iconContainer: {
     width: '30%',
@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
     color: '#333'
   },
   viewMoreButton: {
-    backgroundColor: '#007bff',
+    backgroundColor: '#0BA787',
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 8

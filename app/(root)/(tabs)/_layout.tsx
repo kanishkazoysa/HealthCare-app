@@ -29,7 +29,7 @@ export default function TabLayout() {
         name="home"
         options={{
           title: 'Home',
-          headerTitle: 'Welcome Home', // Set the top bar title
+          headerTitle: 'Find Your Hospital', // Set the top bar title
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
         }}
       />
