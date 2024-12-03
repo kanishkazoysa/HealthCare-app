@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, ReactNode } from 'react';
 import { 
   StyleSheet, 
   Text, 
@@ -64,70 +64,68 @@ const useHospitalStore = create<HospitalStore>()(
   )
 );
 
-// Dummy hospital data
-const hospitalData = [
-  {
-    id: '1',
-    name: 'City Central Hospital',
-    address: '123 Main St, New York, USA',
-    phone: '+1 (555) 123-4567',
-    beds: 250,
-    icon: require('../../../assets/images/hospital.webp')
-  },
-  {
-    id: '2',
-    name: 'Riverside Medical Center',
-    address: '456 River Road, Chicago, USA',
-    phone: '+1 (555) 987-6543',
-    beds: 350,
-    icon: require('../../../assets/images/hospital.webp')
-  },
-  {
-    id: '3',
-    name: 'Metropolitan General',
-    address: '789 Urban Avenue, Los Angeles, USA',
-    phone: '+1 (555) 246-8135',
-    beds: 400,
-    icon: require('../../../assets/images/hospital.webp')
-  },
-  {
-    id: '4',
-    name: 'Green Valley Hospital',
-    address: '321 Hill Street, San Francisco, USA',
-    phone: '+1 (555) 369-2580',
-    beds: 200,
-    icon: require('../../../assets/images/hospital.webp')
-  }
-];
-
 interface Hospital {
+  city: ReactNode;
+  lastUpdated: ReactNode;
   id: string;
   name: string;
   address: string;
   phone: string;
   beds: number;
-  icon: any;
+  icon: string;
 }
 
-const Home = (p0: (state: any) => any) => {
+const Home = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  
-  // Use Zustand store hooks
+  const [hospitalData, setHospitalData] = useState<Hospital[]>([]);
+
   const viewedHospitals = useHospitalStore((state) => state.viewedHospitals);
   const addViewedHospital = useHospitalStore((state) => state.addViewedHospital);
   const viewedCount = useHospitalStore((state) => state.getViewedCount());
 
-  // Filter hospitals based on search query
-  const filteredHospitals = hospitalData.filter(hospital => 
-    hospital.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    hospital.address.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  useEffect(() => {
+    const fetchHospitalData = async () => {
+      try {
+        const response = await fetch('http://www.communitybenefitinsight.org/api/get_hospitals.php?state=NC', {
+          headers: {
+            'x-app-id': '284ccf85',
+            'x-app-key': 'e60ca844ee1d9c16dadb248f461c28b0'
+          }
+        });
+
+        const data = await response.json();
+        console.log('Parsed JSON data:', data);
+
+        // Map response to set hospital data
+        const hospitals = data.map((item: any) => ({
+          id: item.hospital_id,
+          name: item.name,
+          city: item.city, 
+          beds: item.hospital_bed_count, 
+          address: item.street_address, 
+          zip_code: item.zip_code, 
+        }));
+        
+        setHospitalData(hospitals);
+
+      } catch (error) {
+        console.error('Error fetching hospital data:', error);
+      }
+    };
+
+    fetchHospitalData();
+  }, []);
+
+  const filteredHospitals = hospitalData.filter(hospital => {
+    const nameMatch = hospital.name && hospital.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const addressMatch = hospital.address && hospital.address.toLowerCase().includes(searchQuery.toLowerCase());
+    return nameMatch || addressMatch;
+  });
 
   const HospitalCard = ({ hospital }: { hospital: Hospital }) => {
     const isViewed = viewedHospitals[hospital.id];
 
     const handleViewMore = () => {
-      // Only add to viewed hospitals if not already viewed
       if (!isViewed) {
         addViewedHospital(hospital.id);
       }
@@ -135,38 +133,36 @@ const Home = (p0: (state: any) => any) => {
 
     return (
       <View style={styles.card}>
-        {/* Hospital Icon - 30% width */}
-        <View style={styles.iconContainer}>
-          <Image 
-            source={hospital.icon} 
-            style={styles.hospitalIcon} 
-            resizeMode="contain"
-          />
-        </View>
-
-        {/* Hospital Details - 70% width */}
+         <View style={styles.iconContainer}>
+        {/* Display hospital icon */}
+        {/* If hospital.icon is empty or undefined, use a default image */}
+        <Image
+          source={require('../../../assets/images/hospital.webp')} // Path to the local image
+          style={styles.hospitalIcon}
+        />
+      </View>
         <View style={styles.detailsContainer}>
           <Text style={styles.hospitalName}>{hospital.name}</Text>
+          <Text style={styles.hospitalDetail}>
+            <Text style={styles.detailLabel}>City: </Text>
+            {hospital.city}
+          </Text>
           <Text style={styles.hospitalDetail}>
             <Text style={styles.detailLabel}>Address: </Text>
             {hospital.address}
           </Text>
           <Text style={styles.hospitalDetail}>
-            <Text style={styles.detailLabel}>Phone: </Text>
-            {hospital.phone}
+            <Text style={styles.detailLabel}>Beds: </Text>
+            {hospital.beds}
           </Text>
-          <View style={styles.bedsAndButtonContainer}>
-            <Text style={styles.hospitalDetail}>
-              <Text style={styles.detailLabel}>Beds: </Text>
-              {hospital.beds}
-            </Text>
+          <Text style={styles.hospitalDetail}>
+            <Text style={styles.detailLabel}>Zip Code: </Text>
+            {hospital.lastUpdated}
+          </Text>
 
-            {/* View More Button */}
+          <View style={styles.bedsAndButtonContainer}>
             <TouchableOpacity 
-              style={[
-                styles.viewMoreButton, 
-                isViewed && styles.viewedButton
-              ]} 
+              style={[styles.viewMoreButton, isViewed && styles.viewedButton]} 
               onPress={handleViewMore}
             >
               <Text style={styles.viewMoreText}>
@@ -181,7 +177,6 @@ const Home = (p0: (state: any) => any) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Search and Viewed Count Container */}
       <View style={styles.searchContainer}>
         <View style={styles.searchInputContainer}>
           <Feather 
@@ -202,7 +197,6 @@ const Home = (p0: (state: any) => any) => {
         </View>
       </View>
 
-      {/* Hospital Cards Scrollview */}
       <ScrollView 
         contentContainerStyle={styles.scrollViewContent}
         showsVerticalScrollIndicator={false}
@@ -214,6 +208,8 @@ const Home = (p0: (state: any) => any) => {
     </SafeAreaView>
   );
 };
+
+
 
 const styles = StyleSheet.create({
   container: {
@@ -298,32 +294,29 @@ const styles = StyleSheet.create({
   hospitalName: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#333'
+    color: '#2c3e50'
   },
   hospitalDetail: {
     fontSize: 14,
-    color: '#666',
-    marginBottom: 5
+    color: '#7f8c8d'
   },
   detailLabel: {
-    fontWeight: 'bold',
-    color: '#333'
+    fontWeight: 'bold'
   },
   viewMoreButton: {
     backgroundColor: '#0BA787',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 8
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 20,
   },
   viewedButton: {
-    backgroundColor: '#888'
+    backgroundColor: '#7f8c8d',
   },
   viewMoreText: {
     color: 'white',
-    fontWeight: 'bold',
-    fontSize: 12
-  }
+    fontWeight: 'bold'
+  },
+  
 });
 
 export default Home;
