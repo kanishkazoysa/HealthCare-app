@@ -10,10 +10,12 @@ import {
   ActivityIndicator
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Feather } from '@expo/vector-icons';
+import { Feather,MaterialIcons } from '@expo/vector-icons';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter, useLocalSearchParams, router } from "expo-router";
+
 
 // Create Zustand store for hospital views
 interface HospitalStore {
@@ -81,7 +83,7 @@ const Home = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [hospitalData, setHospitalData] = useState<Hospital[]>([]);
   const [loading, setLoading] = useState(true); // Loading state to show the loader
-
+  const { userIdentifier } = useLocalSearchParams();
   const viewedHospitals = useHospitalStore((state) => state.viewedHospitals);
   const addViewedHospital = useHospitalStore((state) => state.addViewedHospital);
   const viewedCount = useHospitalStore((state) => state.getViewedCount());
@@ -137,6 +139,7 @@ const Home = () => {
       }
     };
 
+    
     return (
       <View style={styles.card}>
         <View style={styles.iconContainer}>
@@ -182,8 +185,19 @@ const Home = () => {
     );
   };
 
+  const handleLogout = () => {
+    router.replace("/login");
+  };
+
   return (
     <SafeAreaView style={styles.container}>
+       <View style={styles.welcomeContainer}>
+        <Text style={styles.welcomeText}>Welcome,</Text>
+        <Text style={styles.userIdentifierText}>{userIdentifier}</Text>
+        <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+          <MaterialIcons name="logout" size={24} color="#0BA787" />
+        </TouchableOpacity>
+      </View>
       <View style={styles.searchContainer}>
         <View style={styles.searchInputContainer}>
           <Feather 
@@ -228,6 +242,28 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
     paddingHorizontal: 15
+  },
+  welcomeContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+  },
+  welcomeText: {
+    fontSize: 30,
+    marginVertical: 5,
+    fontWeight: "bold",
+    textAlign: 'center',
+  },
+  userIdentifierText: {
+    fontSize: 15,
+    fontWeight: "bold",
+    color: "#0BA787",
+    textAlign: 'center',
+  },
+  logoutButton: {
+    position: 'absolute',
+    right: 0,
+    padding: 10,
   },
   searchContainer: {
     marginTop: 15,
