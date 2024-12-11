@@ -16,6 +16,7 @@ import { StatusBar } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import images from "@/constants/images";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -29,15 +30,17 @@ const Register = () => {
   });
   const [passwordVisible, setPasswordVisible] = useState(false);
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     const { username, email, password, confirmPassword } = form;
     if (username === "" || email === "" || password === "" || confirmPassword === "") {
       Alert.alert("Error", "Please fill in all fields.");
     } else if (password !== confirmPassword) {
       Alert.alert("Error", "Passwords do not match.");
     } else {
+      await AsyncStorage.setItem('userDetails', JSON.stringify({ username, email, password }));//store user details in async storage
       Alert.alert("Registration Successful", "You have successfully registered!");
       router.replace("/login");
+      console.log("User Details: ", { username, email, password });
     }
   };
 

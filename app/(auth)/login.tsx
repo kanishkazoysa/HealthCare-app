@@ -16,6 +16,7 @@ import { StatusBar } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import images from "@/constants/images";
 import { router } from "expo-router";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const Login = () => {
@@ -24,19 +25,36 @@ const Login = () => {
     password: "",
   });
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const handleLogin = () => {
+
+  const handleLogin = async () => {
     if (form.email === "" || form.password === "") {
       Alert.alert("Error", "Please fill in both fields.");
     } else {
-      router.replace("/(root)/(tabs)/home");
+      try {
+        const userDetails = await AsyncStorage.getItem('userDetails');
+        if (userDetails !== null) {
+          const { username, email, password } = JSON.parse(userDetails);
+          if ((form.email === email || form.email === username) && form.password === password) {
+            const userIdentifier = form.email === username ? username : email;
+            router.replace({
+              pathname: "/(root)/(tabs)/home",
+              params: { userIdentifier }
+            });
+          } else {
+            Alert.alert("Error", "Invalid email/username or password.");
+          }
+        } else {
+          Alert.alert("Error", "No user found. Please register first.");
+        }
+      } catch (error) {
+        Alert.alert("Error", "Failed to retrieve user details.");
+      }
     }
   };
 
   const handleSignUpPress = () => {
     router.replace("/register");
   };
-
-
 
   return (
     <KeyboardAvoidingView
@@ -63,7 +81,7 @@ const Login = () => {
             <MaterialIcons name="email" size={24} color="#ccc" style={styles.inputIcon} />
             <TextInput
               style={styles.inputField}
-              placeholder="Enter your email"
+              placeholder="Enter your email/username"
               placeholderTextColor="#aaa"
               value={form.email}
               onChangeText={(value) => setForm({ ...form, email: value })}
