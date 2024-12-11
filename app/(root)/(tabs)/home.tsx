@@ -21,6 +21,7 @@ import { useRouter, useLocalSearchParams, router } from "expo-router";
 interface HospitalStore {
   viewedHospitals: Record<string, boolean>;
   addViewedHospital: (hospitalId: string) => void;
+  clearViewedHospitals: () => void;
   getViewedCount: () => number;
 }
 
@@ -47,6 +48,7 @@ const useHospitalStore = create<HospitalStore>()(
           [hospitalId]: true
         }
       })),
+      clearViewedHospitals: () => set({ viewedHospitals: {} }),
       getViewedCount: () => {
         const { viewedHospitals } = get();
         return Object.keys(viewedHospitals).length;
@@ -87,6 +89,7 @@ const Home = () => {
   const viewedHospitals = useHospitalStore((state) => state.viewedHospitals);
   const addViewedHospital = useHospitalStore((state) => state.addViewedHospital);
   const viewedCount = useHospitalStore((state) => state.getViewedCount());
+  const clearViewedHospitals = useHospitalStore((state) => state.clearViewedHospitals);
 
   useEffect(() => {
     // Fetch hospital data only once
@@ -189,9 +192,17 @@ const Home = () => {
     router.replace("/login");
   };
 
+  const handleRefresh = () => {
+    clearViewedHospitals();
+  };
+  
+
   return (
     <SafeAreaView style={styles.container}>
        <View style={styles.welcomeContainer}>
+        <TouchableOpacity onPress={handleRefresh} style={styles.refreshButton}>
+          <MaterialIcons name="refresh" size={28} color="#0BA787" />
+        </TouchableOpacity>
         <Text style={styles.welcomeText}>Welcome,</Text>
         <Text style={styles.userIdentifierText}>{userIdentifier}</Text>
         <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
@@ -242,6 +253,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
     paddingHorizontal: 15
+  },
+  refreshButton: {
+    position: 'absolute',
+    left: 0,
+    padding: 10,
   },
   welcomeContainer: {
     alignItems: 'center',
