@@ -18,7 +18,6 @@ import { router } from "expo-router";
 import images from "@/constants/images";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 const Register = () => {
@@ -29,15 +28,53 @@ const Register = () => {
     confirmPassword: "",
   });
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [errors, setErrors] = useState({
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const validateEmail = (email: string) => {
+    const re = /\S+@\S+\.\S+/;
+    return re.test(email);
+  };
 
   const handleRegister = async () => {
     const { username, email, password, confirmPassword } = form;
-    if (username === "" || email === "" || password === "" || confirmPassword === "") {
-      Alert.alert("Error", "Please fill in all fields.");
+    let valid = true;
+    let newErrors = { username: "", email: "", password: "", confirmPassword: "" };
+
+    if (username === "") {
+      newErrors.username = "Username is required.";
+      valid = false;
+    }
+    if (email === "") {
+      newErrors.email = "Email is required.";
+      valid = false;
+    } else if (!validateEmail(email)) {
+      newErrors.email = "Enter correct email address.";
+      valid = false;
+    }
+    if (password === "") {
+      newErrors.password = "Password is required.";
+      valid = false;
+    } else if (password.length < 8) {
+      newErrors.password = "Password must be at least 8 characters.";
+      valid = false;
+    }
+    if (confirmPassword === "") {
+      newErrors.confirmPassword = "Confirm Password is required.";
+      valid = false;
     } else if (password !== confirmPassword) {
-      Alert.alert("Error", "Passwords do not match.");
-    } else {
-      await AsyncStorage.setItem('userDetails', JSON.stringify({ username, email, password }));//store user details in async storage
+      newErrors.confirmPassword = "Passwords do not match.";
+      valid = false;
+    }
+
+    setErrors(newErrors);
+
+    if (valid) {
+      await AsyncStorage.setItem('userDetails', JSON.stringify({ username, email, password }));
       Alert.alert("Registration Successful", "You have successfully registered!");
       router.replace("/login");
       console.log("User Details: ", { username, email, password });
@@ -64,7 +101,6 @@ const Register = () => {
         <Text style={styles.welcomeText}>REGISTER</Text>
       </View>
 
-      {/* Scrollable Content */}
       <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.scrollContentContainer}>
         <View style={styles.formContainer}>
           <View style={styles.inputContainer}>
@@ -78,8 +114,8 @@ const Register = () => {
               autoCapitalize="none"
             />
           </View>
+          {errors.username ? <Text style={styles.errorText}>{errors.username}</Text> : null}
 
-       
           <View style={styles.inputContainer}>
             <MaterialIcons name="email" size={24} color="#ccc" style={styles.inputIcon} />
             <TextInput
@@ -92,8 +128,8 @@ const Register = () => {
               autoCapitalize="none"
             />
           </View>
+          {errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
 
-         
           <View style={styles.inputContainer}>
             <MaterialIcons name="lock" size={24} color="#ccc" style={styles.inputIcon} />
             <TextInput
@@ -109,8 +145,8 @@ const Register = () => {
               <MaterialIcons name={passwordVisible ? "visibility" : "visibility-off"} size={24} color="#707171" />
             </TouchableOpacity>
           </View>
+          {errors.password ? <Text style={styles.errorText}>{errors.password}</Text> : null}
 
-          
           <View style={styles.inputContainer}>
             <MaterialIcons name="lock" size={24} color="#ccc" style={styles.inputIcon} />
             <TextInput
@@ -126,8 +162,8 @@ const Register = () => {
               <MaterialIcons name={passwordVisible ? "visibility" : "visibility-off"} size={24} color="#707171" />
             </TouchableOpacity>
           </View>
+          {errors.confirmPassword ? <Text style={styles.errorText}>{errors.confirmPassword}</Text> : null}
 
-         
           <TouchableOpacity style={styles.loginButton} onPress={handleRegister}>
             <Text style={styles.buttonText}>Register</Text>
           </TouchableOpacity>
@@ -233,6 +269,12 @@ const styles = StyleSheet.create({
   linkText: {
     color: "#2196F3",
     fontWeight: "bold",
+  },
+  errorText: {
+    color: "red",
+    marginTop: -40,
+    marginBottom: 40,
+    paddingHorizontal: 10,
   },
 });
 

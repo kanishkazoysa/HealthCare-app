@@ -18,40 +18,64 @@ import images from "@/constants/images";
 import { router } from "expo-router";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+
 const Login = () => {
   const [form, setForm] = useState({
     email: "",
     password: "",
   });
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [errors, setErrors] = useState({
+    email: "",
+    password: "",
+  });
 
   const handleLogin = async () => {
-    if (form.email === "" || form.password === "") {
-      Alert.alert("Error", "Please fill in both fields.");
-    } else {
+    const { email, password } = form;
+    let valid = true;
+    let newErrors = { email: "", password: "" };
+
+    if (email === "") {
+      newErrors.email = "Email/username is required.";
+      valid = false;
+    }
+    if (password === "") {
+      newErrors.password = "Password is required.";
+      valid = false;
+    }
+
+    setErrors(newErrors);
+
+    if (valid) {
       try {
         const userDetails = await AsyncStorage.getItem('userDetails');
         if (userDetails !== null) {
-          const { username, email, password } = JSON.parse(userDetails);
-          if ((form.email === email || form.email === username) && form.password === password) {
-            const userIdentifier = form.email === username ? username : email;
+          const storedUser = JSON.parse(userDetails);
+          
+          // More secure comparison 
+          const isValidUser = 
+            (email === storedUser.email || email === storedUser.username) && 
+            password === storedUser.password;
+
+          if (isValidUser) {
             router.replace({
               pathname: "/(root)/(tabs)/home",
-              params: { userIdentifier }
+              params: { userIdentifier: email }
             });
           } else {
-            Alert.alert("Error", "Invalid email/username or password.");
+            Alert.alert("Login Failed", "Invalid email or password.");
           }
         } else {
           Alert.alert("Error", "No user found. Please register first.");
         }
       } catch (error) {
-        Alert.alert("Error", "Failed to retrieve user details.");
+        Alert.alert("Error", "An error occurred during login.");
+        console.error(error);
       }
     }
   };
+  
 
   const handleSignUpPress = () => {
     router.replace("/register");
@@ -90,6 +114,7 @@ const Login = () => {
               autoCapitalize="none"
             />
           </View>
+          {errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
 
           <View style={styles.inputContainer}>
             <MaterialIcons name="lock" size={24} color="#ccc" style={styles.inputIcon} />
@@ -106,6 +131,7 @@ const Login = () => {
               <MaterialIcons name={passwordVisible ? "visibility" : "visibility-off"} size={24} color="#707171" />
             </TouchableOpacity>
           </View>
+          {errors.password ? <Text style={styles.errorText}>{errors.password}</Text> : null}
 
           <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
             <Text style={styles.buttonText}>Sign In</Text>
@@ -211,6 +237,12 @@ const styles = StyleSheet.create({
   linkText: {
     color: "#2196F3",
     fontWeight: "bold",
+  },
+  errorText: {
+    color: "red",
+    fontSize: 14,
+    marginTop: -15,
+    marginBottom: 10,
   },
 });
 
